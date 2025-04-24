@@ -39,40 +39,40 @@ This project is a Java-based card game that supports multiple players, rounds, a
 
 4. **Follow the Prompts:**
 
-    Enter the number of players (between 2 and 17).
-    Enter the starting amount for each player (between 10,000 and 214 crore).
-    Play the game by choosing actions like "Chal," "Pack," "Double Chal," or "Show."
+    - Enter the number of players (between 2 and 17).
+    - Enter the starting amount for each player (between 10,000 and 214 crore).
+    - Play the game by choosing actions like "Chal," "Pack," "Double Chal," or "Show."
 
 
 ## Gameplay Instructions
 1. **Starting the Game:**
 
-- Enter the number of players (2–17).
-Enter the starting balance for each player (10,000–214 crore).
+  - Enter the number of players (2–17).
+  - Enter the starting balance for each player (10,000–214 crore).
 
 2. **Player Actions:**
 
-- **Chal (C):** Bet the current chal amount.
-- **Double Chal (D):** Bet double the current chal amount.
-- **Pack (P):** Fold and exit the current round.
-- **Show (S):** Reveal cards to determine the winner (only allowed when 2 players remain).
+  - **Chal (C):** Bet the current chal amount.
+  - **Double Chal (D):** Bet double the current chal amount.
+  - **Pack (P):** Fold and exit the current round.
+  - **Show (S):** Reveal cards to determine the winner (only allowed when 2 players remain).
 
 3. **Winning Conditions:**
 
-- The player with the highest card priority wins.
-- If only one player remains, they are declared the winner.
-- If the pot limit is exceeded, the winner is determined based on card priorities.
+  - The player with the highest card priority wins.
+  - If only one player remains, they are declared the winner.
+  - If the pot limit is exceeded, the winner is determined based on card priorities.
 
 4. **Card Priorities:**
 
-- **Trial:** Three cards of the same rank.
+  - **Trial:** Three cards of the same rank.
 
-- **Pure Sequence:** Three consecutive cards of the same suit.
+  - **Pure Sequence:** Three consecutive cards of the same suit.
 
-- **Sequence:** Three consecutive cards of different suits.
+  - **Sequence:** Three consecutive cards of different suits.
 
-- **Colour:** Three cards of the same suit.
+  - **Colour:** Three cards of the same suit.
 
-- **Double:** Two cards of the same rank.
+  - **Double:** Two cards of the same rank.
 
-- **High Card:** The highest card among all players.
+  - **High Card:** The highest card among all players.

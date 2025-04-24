@@ -1,0 +1,947 @@
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Scanner;
+
+public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlayersCard { 
+    // Creating Deck of Card
+    static int[][] deck = new int[52][2];
+    static Scanner sc1 = new Scanner(System.in);
+
+    // Initialise Deck of Card
+    // Speads:17 | Diamonds:18 | Hearts:19 | Clubs.:20
+    // index:0 cardName:2 | index:1 cardName:3 | ... | index:8 cardName:10
+    // index:9 notataion:11 cardName:J | index:10 notataion:12 cardName:Q | index:11 notataion:13 cardName:K | index:12 notataion:14 cardName:A
+    static int[] Shape = {17, 18, 19, 20};
+    static int temporaryShapeI = 0;
+    static int tempSh = Shape[temporaryShapeI];
+    static int[] Number = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+    static int temporaryNumberI = 0;
+    static int tempNum = Number[temporaryNumberI];
+    static int temporarySwap = 0;
+    static int x = 0; // For checking 13 Number
+    static int y = 0; // For checking 4 Shapes
+    
+    // Variable for Distribusting card line by line
+    static int distributiveNextElement = 0;
+    
+    // Variable for knowing how many players are there
+    static { System.out.print("Enter number of total player (Between 2 and 17) : " );} // AI is used
+    static int totalPlayer;
+    static{ // AI is used
+        while(!(sc1.hasNextInt())){
+            System.out.println("Please enter total player between 2 and 17.\nEnter again : ");
+            sc1.nextInt();
+        }
+        totalPlayer = sc1.nextInt();
+    }
+
+    // Array for distributed Array
+    static int[][][] distributedCard = new int[totalPlayer][3][2];
+
+    // Array for know that how many players are there with same priority's card AND other array is to know which player have which priority's card
+    static int[] numOfPriority = new int[6];
+    static int[] playersWithPriority = new int[totalPlayer];
+
+    // Trial->5 | Pure Sequence->4 | Sequence->3 | Colour->2 | Double->1 | High Card->0
+    // To know which is max priority card among the player
+    static int maxPriority = 0;
+
+    // Array for storing temporary sorted card who is winner AND other is for the player who gonna compare with winner
+    static int[] sortWinCard = new int[3];
+    static int[] sortCompareCard = new int[3];
+
+    // Input for amount which is starting of game where each player have same amount of money
+    static { System.out.print("\nEnter amount that each player will have at staring of the game (Between 10K and 214Cr) : "); }
+    static int amountHavingAllPlayer;
+    static{
+        while(!(sc1.hasNextInt())){
+            System.out.print("Please enter valid amount : ");
+            sc1.nextInt();
+            System.out.println();
+        }
+        amountHavingAllPlayer = sc1.nextInt();
+    }
+
+    // Variable to know winner is declared or not, 0 means not declared, 1 means declared and then ask for new game
+    static int isWinnerDeclared = 0;
+
+    // Variable for knowing current chal value because we have double chaal option
+    static int currChal = (int) Math.ceil(amountHavingAllPlayer * 2 / 100);
+
+    // Variable for getting maximum pot limit
+    static int potLimit = (int) Math.ceil(totalPlayer * amountHavingAllPlayer / 2);
+    // Varible for knowing how much the pot is at current scenario
+    static int currPot = totalPlayer * currChal;
+
+    // Array for knowing which player has how much money remaining
+    static int[] money = new int[totalPlayer];
+
+    // For loop for giving amount to all player
+    static {
+        for(int i=0; i<totalPlayer; i++){
+            money[i] = amountHavingAllPlayer;
+        }
+    }
+    
+    public static void main(String[] args) {
+        // For taking Input
+        // Scanner sc = new Scanner(System.in);
+
+        //Taking input that how many players are there in the game
+        // System.out.print("Enter number of player(less than 18) : \t");
+        // totalPlayer = sc.nextInt();
+
+        if( ((totalPlayer > 1) && (totalPlayer < 18)) && ((amountHavingAllPlayer >= 10000) && (amountHavingAllPlayer <= 2140000000)) ){
+            
+            // Initialize Deck of Card
+            initializeDeckOfCard();
+            
+            // Print initial deck of card
+            // printInitialCard();
+
+            // Shuffle the card
+            doShuffle();
+
+            // Print suffled card
+            //printShuffledDeck();
+
+            // Distribute the card
+            distributeSuffledCard();
+
+            // Print distributed card
+            // printDistributedDeck();
+
+            // Find Winner
+            // Initialize numOfPriority AND playersWithPriority with value 0
+            for(int i=0; i<6; i++){
+                numOfPriority[i] = 0;
+            }
+            for(int i=0; i<totalPlayer; i++){
+                playersWithPriority[i] = 0;
+            }
+
+            withChalAndPackFunctionality(distributedCard);
+
+            // sc.close();
+        }else if( ((totalPlayer < 2) && (totalPlayer > 17)) && ((amountHavingAllPlayer < 10000) && (amountHavingAllPlayer > 2140000000)) ) {
+            System.out.println("Enter player between 2-17, and amount between 10K-214Cr.");
+        }else if((totalPlayer < 2) && (totalPlayer > 17)){
+            System.out.println("Enter player between 2-17.");
+        }else if( (amountHavingAllPlayer < 10000) && (amountHavingAllPlayer > 2140000000) ){
+            System.out.println("Enter amount between 10K-214Cr.");
+        }
+    }  
+
+    // Method for filling Number in the distributedCard
+    public static int returnCardNumber(int p){
+        int tempStr = deck[p][0];
+        return tempStr;
+    }
+    // Method for filling Shape in the distributedCard
+    public static int returnCardShape(int p){
+        int tempStr = deck[p][1];
+        distributiveNextElement++;
+        return tempStr;
+    }
+
+    //  Method for initializing the deck of card
+    public static void initializeDeckOfCard(){
+         temporaryShapeI = 0;
+         tempSh = Shape[temporaryShapeI];
+         temporaryNumberI = 0;
+         tempNum = Number[temporaryNumberI];
+         temporarySwap = 0;
+         x = 0; // For checking 13 Number
+         y = 0; // For checking 4 Shapes
+        for(int i=0; i<52; i++){
+            for(int j=0; j<2; j++){
+                if(j == 0){
+                    deck[i][j]=tempNum;
+                    temporaryNumberI++;
+                    if(temporaryNumberI == 13){
+                        temporaryNumberI = 0;
+                    }
+                    tempNum = Number[temporaryNumberI];
+                }else{
+                    deck[i][j] = tempSh;
+                    x++;
+                    if(x == 13){
+                        x=0;
+                        y++;
+                        if(y == 4){
+                            y=0;
+                            temporaryShapeI--;
+                        }
+                        temporaryShapeI++;
+                        tempSh = Shape[temporaryShapeI];
+                    }
+                }
+            }   
+        }
+    }
+
+    // Method for printing initial card deck
+    public static void printInitialCard() {
+        System.out.println("Printing the initial deck of card");
+        for(int i=0; i<52; i++){
+            for(int j=0; j<2; j++){
+                if(j == 0){
+                    System.out.print("["+ printNumber(deck[i][j]) );
+                }else{
+                    System.out.print(","+ printShape(deck[i][j])+"]");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println("---------------------------------");
+    }
+
+    public static void doShuffle(){
+        // No of time suffle
+        for(int j=0; j<10; j++){
+            //Logic for shuffle
+            for(int i=0; i<52; i++){
+                int randomIndex = (int)(Math.random()*52);
+                // Swap j = 0(Numbers)
+                temporarySwap = deck[i][0];
+                deck[i][0] = deck[randomIndex][0];
+                deck[randomIndex][0] = temporarySwap;
+            
+                // Swap j = 1(Shape)
+                temporarySwap = deck[i][1];
+                deck[i][1] = deck[randomIndex][1];
+                deck[randomIndex][1] = temporarySwap;
+            }
+        }
+    }
+    
+    // Method for printing Shuffled Deck of Card
+    public static void printShuffledDeck(){
+        System.out.println("Printing the shuffled deck of card");
+        for(int i = 0; i<52; i++){
+            for(int j = 0; j<2; j++){
+                if(j == 0){
+                    System.out.print("["+ printNumber(deck[i][j]) );
+                }else{
+                    System.out.print(","+ printShape(deck[i][j]) +"]");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println("---------------------------------");
+    }
+
+    public static void distributeSuffledCard(){
+        for(int i=0; i<3; i++){
+            for(int j=0; j<totalPlayer; j++){
+                for(int k=0; k<2; k++){
+                    if(k==0){
+                        distributedCard[j][i][k] = returnCardNumber(distributiveNextElement);
+                    }else{
+                        distributedCard[j][i][k] = returnCardShape(distributiveNextElement);
+                    }
+                }
+            }
+        }
+        distributiveNextElement = 0;
+    }
+
+    // Method for printing Distributed Deck of Card
+    public static void printDistributedDeck(){
+        System.out.println("Printing the distributed deck of card");
+        for(int i=0; i<totalPlayer; i++){
+            System.out.print("Player "+(i+1)+"'s card :\t");
+            for(int j=0; j<3; j++){
+                for(int k=0; k<2; k++){
+                    if(k==0){
+                        System.out.print("["+ printNumber(distributedCard[i][j][k]) );
+                    }else{
+                        System.out.print(","+ printShape(distributedCard[i][j][k])+"]");
+                    }
+                }
+            }
+            System.out.println();
+        }
+        System.out.println("---------------------------------");
+    }
+
+    public static void printCurrentPlayerCard(int[][][] distributedNewCard, int i){
+        for(int j=0; j<3; j++){
+            for(int k=0; k<2; k++){
+                if(k==0){
+                    System.out.print("["+ printNumber(distributedNewCard[i][j][k]) );
+                }else{
+                    System.out.print(","+ printShape(distributedNewCard[i][j][k]) +"]");
+                }
+            }
+        }
+    }
+
+    public static void printMaxPriorityArrayWithCards(int[][][] maxPriorityArrayWithCards, int numOfPlayersWithMaxPriorityCards){
+        System.out.println("Printing the max proirity card from the distributed card");
+        for(int i=0; i<numOfPlayersWithMaxPriorityCards; i++){
+            //System.out.print("Player "+(i+1)+"'s card :\t");
+            for(int j=0; j<3; j++){
+                for(int k=0; k<2; k++){
+                    if(k==0){
+                        System.out.print("["+ printNumber(maxPriorityArrayWithCards[i][j][k]) );
+                    }else{
+                        System.out.print(","+ printShape(maxPriorityArrayWithCards[i][j][k]) +"]");
+                    }
+                }
+            }
+            System.out.println();
+        }
+        System.out.println("---------------------------------");
+    }
+
+    // Method for printing the number pf card along with its value
+    // index:0 cardName:2 | index:1 cardName:3 | ... | index:8 cardName:10
+    // index:9 notataion:11 cardName:J | index:10 notataion:12 cardName:Q | index:11 notataion:13 cardName:K | index:12 notataion:14 cardName:A
+    public static String printNumber(int i){
+        switch (i) {
+            case 2:
+                return "2";
+            case 3:
+                return "3";
+            case 4:
+                return "4";
+            case 5:
+                return "5";
+            case 6:
+                return "6";
+            case 7:
+                return "7";
+            case 8:
+                return "8";
+            case 9:
+                return "9";
+            case 10:
+                return "10";
+            case 11:
+                return "J";
+            case 12:
+                return "Q";
+            case 13:
+                return "K";
+            case 14:
+                return "A";
+            default:
+                return "";
+        }
+    }
+
+    // Method for printinf the shape of card along with its value
+    // Speads:17 | Diamonds:18 | Hearts:19 | Clubs.:20
+
+    // Method for print shape
+    // public static String printShape(int i){
+    //     switch (i) {
+    //         case 17:
+    //             return "\u2660"; // Spades ♠
+    //         case 18:
+    //             return "\u2666"; // Diamonds ♦
+    //         case 19:
+    //             return "\u2665"; // Hearts ♥
+    //         case 20:
+    //             return "\u2663"; // Clubs ♣
+    //         default:
+    //             return "";
+    //     }
+    // }
+
+    // Method for print string
+    public static String printShape(int i){
+        switch (i) {
+            case 17:
+                return "S"; // Spades ♠
+            case 18:
+                return "D"; // Diamonds ♦
+            case 19:
+                return "H"; // Hearts ♥
+            case 20:
+                return "C"; // Clubs ♣
+            default:
+                return "";
+        }
+    }
+
+    // Method for print winner among the high card player
+    public static void winnerAmongHighCard(int[][][] arrayHighCard, int samePriorCard, int[] priorCardPlayer){
+        winnerFromAnyPriorityCards(arrayHighCard, samePriorCard);
+    }
+
+    // Method for print winner among the double card player
+    public static void winnerAmongDouble(int[][][] arrayDouble, int samePriorCard, int[] priorCardPlayer){
+        int winnerIndex = 0;
+        if (samePriorCard == 1) {
+            winnerIndex = 0;
+        } else {
+            for(int i=0; i<samePriorCard; i++){
+                sortWinCard = sortWinnerCard(arrayDouble[winnerIndex][0][0], arrayDouble[winnerIndex][1][0], arrayDouble[winnerIndex][2][0]);
+                sortCompareCard = sortComparingCard(arrayDouble[i][0][0], arrayDouble[i][1][0], arrayDouble[i][2][0]);
+                if( (arrayDouble[i][0][0] == arrayDouble[i][1][0]) ){
+                    if( (arrayDouble[winnerIndex][0][0] == arrayDouble[winnerIndex][1][0]) ){
+                        if( (arrayDouble[i][0][0] > arrayDouble[winnerIndex][0][0]) ){
+                            winnerIndex = i;
+                            swapWinnerAndComparingCard();
+                        }
+                    }else{
+                        if( (arrayDouble[i][0][0] > arrayDouble[winnerIndex][1][0]) ){
+                            winnerIndex = i;
+                            swapWinnerAndComparingCard();
+                        }
+                    }
+                }else{
+                    if( (arrayDouble[winnerIndex][0][0] == arrayDouble[winnerIndex][1][0]) ){
+                        if( (arrayDouble[i][1][0] > arrayDouble[winnerIndex][0][0]) ){
+                            winnerIndex = i;
+                            swapWinnerAndComparingCard();
+                        }
+                    }else{
+                        if( (arrayDouble[i][1][0] > arrayDouble[winnerIndex][1][0]) ){
+                            winnerIndex = i;
+                            swapWinnerAndComparingCard();
+                        }
+                    }
+                }
+            }
+        }
+
+        addMoneyToWinner(arrayDouble, winnerIndex);
+        printWinner(winnerIndex);
+    }
+
+    // Method for print winner among the colour card player
+    public static void winnerAmongColour(int[][][] arrayColour, int samePriorCard, int[] priorCardPlayer){
+        winnerFromAnyPriorityCards(arrayColour, samePriorCard);
+    }
+
+    // Method for print winner among the sequence card player
+    public static void winnerAmongSequence(int[][][] arraySequence, int samePriorCard, int[] priorCardPlayer){
+        winnerFromAnyPriorityCards(arraySequence, samePriorCard);
+    }
+
+    // Method for print winner among the pure sequence card player
+    public static void winnerAmongPureSequence(int[][][] arrayPureSequence, int samePriorCard, int[] priorCardPlayer){
+        winnerFromAnyPriorityCards(arrayPureSequence, samePriorCard);
+        
+    }
+
+    // Method for print winner among the trail card player
+    public static void winnerAmongTrial(int[][][] arrayTrail, int samePriorCard, int[] priorCardPlayer){
+        int winnerIndex = 0; // Winner index in maxPriorityArrayWithCards
+        if(samePriorCard == 1){
+            winnerIndex = 0;
+        }else{
+            for(int i=0; i<samePriorCard; i++){
+                if(arrayTrail[winnerIndex][0][0] < arrayTrail[i][0][0]){
+                    winnerIndex = i;
+                }
+            }
+        }
+        addMoneyToWinner(arrayTrail ,winnerIndex);
+        printWinner(winnerIndex);
+    }
+
+    // FINAL SOLUTION of winnerFromAnyPriorityCards
+    public static void winnerFromAnyPriorityCards(int[][][] array, int samePriCard) { 
+        int winnerIndex = 0;
+        if (samePriCard == 1) {
+            winnerIndex = 0;
+        } else {
+            if (array.length > 0 && array[0].length > 0 && array[0][0].length > 0) { // AI is used
+                sortWinCard = sortWinnerCard(array[winnerIndex][0][0], array[winnerIndex][1][0], array[winnerIndex][2][0]);
+                for (int i = 1; i < samePriCard; i++) {
+                    if (array[i].length > 0 && array[i][0].length > 0) {
+                        sortCompareCard = sortComparingCard(array[i][0][0], array[i][1][0], array[i][2][0]);
+                        if (sortWinCard[0] < sortCompareCard[0]) {
+                            winnerIndex = i;
+                            swapWinnerAndComparingCard();
+                        } else if (sortWinCard[0] == sortCompareCard[0]) {
+                            if (sortWinCard[1] < sortCompareCard[1]) {
+                                winnerIndex = i;
+                                swapWinnerAndComparingCard();
+                            } else if (sortWinCard[1] == sortCompareCard[1]) {
+                                if (sortWinCard[2] < sortCompareCard[2]) {
+                                    winnerIndex = i;
+                                    swapWinnerAndComparingCard();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        addMoneyToWinner(array, winnerIndex);
+        printWinner(winnerIndex);
+    }
+
+    // Method for knowing which player's index who is winner and add to its account
+    public static void addMoneyToWinner(int[][][] arr ,int winIndex){
+        for(int i=0; i<totalPlayer; i++){
+            if( (arr[winIndex][0][0] == distributedCard[i][0][0]) && (arr[winIndex][0][1] == distributedCard[i][0][1]) && (arr[winIndex][1][0] == distributedCard[i][1][0]) && (arr[winIndex][1][1] == distributedCard[i][1][1]) && (arr[winIndex][2][0] == distributedCard[i][2][0]) && (arr[winIndex][2][1] == distributedCard[i][2][1]) ){
+                money[i] += currPot;
+                System.out.println( "Player " + (i+1) + ", You won so your balance is " + money[i]);
+            }
+        }
+    }
+
+
+    // Method for printing winner from distributedCard array
+    public static void printWinner(int winIndex) {
+        int count = -1;
+        int winnerInDistributedCard = -1; // Winner in distributedCard
+        for(int i=0; i<playersWithPriority.length; i++){
+            if(playersWithPriority[i] == maxPriority){
+                count++;
+                if(count == winIndex){
+                    winnerInDistributedCard = i;
+                    break;
+                }
+            }
+        }
+        System.out.print("Player "+ (winnerInDistributedCard+1) +" won the game; And the card is");
+        for(int i=0; i<3; i++){
+            for(int j=0; j<2; j++){
+                if(j==0){
+                    System.out.print("["+ printNumber(distributedCard[winnerInDistributedCard][i][j]) );
+                }else{
+                    System.out.print(","+ printShape(distributedCard[winnerInDistributedCard][i][j]) +"]");
+                }
+            }
+        }
+    }
+
+    // Sorting card of the player who is winner
+    public static int[] sortWinnerCard(int i, int j, int k) {
+        Integer[] oldCard = {i, j, k};
+        Arrays.sort(oldCard, Collections.reverseOrder());
+
+        int[] cards = new int[3];
+        for(int x=0; x<cards.length; x++){
+            cards[x] = oldCard[x];
+        }
+        return cards;
+    }
+
+    // Sorting card of player who going to compare with winner
+    public static int[] sortComparingCard(int i, int j, int k) {
+        Integer[] oldCard = {i, j, k};
+        Arrays.sort(oldCard, Collections.reverseOrder());
+
+        int[] cards = new int[3];
+        for(int x=0; x<cards.length; x++){
+            cards[x] = oldCard[x];
+        }
+        return cards;
+    }
+
+    // Method used when winner index is changed and then call this method to store values in sortWinCard[] from sortCompareCard
+    public static void swapWinnerAndComparingCard(){
+        sortWinCard[0] = sortCompareCard[0];
+        sortWinCard[1] = sortCompareCard[1];
+        sortWinCard[2] = sortCompareCard[2];
+    }
+
+    // Method to clear the last printed line
+    public static void clearLine() { // AI is used
+        System.out.print("\033[F"); // Move cursor up one line
+        System.out.print("\033[2K"); // Clear the entire line
+    }
+
+
+
+    // Starting of playing card with Chal and Pack Functionality
+    public static void withChalAndPackFunctionality(int[][][] distributedNewCard){
+        Scanner sc = new Scanner(System.in);
+        String whatToDoStr = "A"; // Variable for knowing what the current player will do
+        char whatToDo = 'a'; // variable for handle the exception for directly press enter in this input field
+        String wantToContinueStr = "Y"; // Variable for knowing what the current player will do
+        char wantToContinue = 'y'; // variable for handle the exception for directly press enter in this input field
+        // Initialized with A to handle error of starting of do...while loop
+        int round = 1; // Varible for knowing how many a player get chance to take take its turn (Maximum 4 times)
+        int remainingPlayer = totalPlayer; // To know how many player is remaining after pack
+        int[] currentPlayerNumber = new int[totalPlayer]; // To know that which player is packed
+        int currentPlayerNumberI = 0; // To know which player's turn it is
+        for(int i=0; i<totalPlayer; i++){
+            currentPlayerNumber[i] = 1;
+        }
+
+        int switchHandle = 0; // If switchHandle is 0, it means no need to go again in switch case AND if switchHandle is 1, it means you have to go again in switch case; It means player must do Chal or Pack when its player's turn
+
+        for(int i=0; i<totalPlayer; i++){
+            money[i] -= currChal;
+        }
+
+        do{
+            // If it winner is declared the ask for new round to start
+            if( isWinnerDeclared == 1 || wantToContinue == 'a'){
+                isWinnerDeclared = 0;
+                System.out.println("\n\n\n\n\n\nDo you want to continue this game?(Y/N) : ");
+                wantToContinueStr = sc.nextLine();
+                
+                if( wantToContinueStr.isEmpty() ){
+                    System.out.println("Null character is not allowed, So enter valid operator");
+                    continue;
+                }
+                wantToContinue = wantToContinueStr.charAt(0);
+                if( !(wantToContinue == 'y' || wantToContinue == 'Y' || wantToContinue == 'n' || wantToContinue == 'N') ){
+                    continue;
+                }
+
+                if( wantToContinue == 'n' || wantToContinue == 'N' ){
+                    continue;
+                }
+                round = 1;
+                whatToDo = 'a';
+                whatToDoStr = "A";
+                remainingPlayer = totalPlayer;
+                switchHandle = 0;
+                currentPlayerNumberI = 0;
+                for(int i=0; i<totalPlayer; i++){
+                    currentPlayerNumber[i] = 1;
+                }
+                currChal = (int) Math.ceil(amountHavingAllPlayer * 2 / 100);
+                currPot = totalPlayer * currChal;
+                for(int i=0; i<totalPlayer; i++){
+                    if(money[i] < currChal){
+                        System.err.println("Player " + (i+1) + " has no sufficient money, So game is forcefully over");
+                        break;
+                    }
+                    money[i] -= currChal;
+                }
+                initializeDeckOfCard();
+                //printInitialCard();
+                doShuffle();
+                //printShuffledDeck();
+                distributeSuffledCard();
+                //printDistributedDeck();
+            }
+                
+            switch (wantToContinue) {
+                case 'Y':
+                case 'y':
+                    while( (remainingPlayer > 1) && (round < 5) ){
+                        System.out.println("\n\n\nIt is round "+ round);
+                        System.out.println("It's player " + (currentPlayerNumberI+1) +"'s trun");
+                    
+                        do{
+                            if( (whatToDoStr == "S" || whatToDoStr == "s") && remainingPlayer == 2 ){
+                                break;
+                            }
+                            System.out.println("Current pot amount is " + currPot + "(Pot limit is : " + potLimit + ")");
+                            System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance is "+money[currentPlayerNumberI]);
+                            System.out.println("Current chal and show, required amount is " + currChal);
+                            System.out.println("And for double chal, you require " + (currChal * 2));
+                            System.out.println("What you will do?");
+                            System.out.println("Chal (C)");
+                            System.out.println("Doublr Chal (D)");
+                            System.out.println("Pack (P)");
+                            System.out.println("Show (S)");
+                            System.out.print("Player "+ (currentPlayerNumberI+1) + ", Your card is : "); 
+                            printCurrentPlayerCard(distributedNewCard, currentPlayerNumberI);
+                            System.out.println();
+                            whatToDoStr = sc.nextLine();
+                            clearLine();
+                            clearLine();
+                            if( whatToDoStr.isEmpty() ){
+                                System.out.println("Null character is not allowed, So enter valid operator");
+                                switchHandle = 1;
+                                continue;
+                            }
+                            whatToDo = whatToDoStr.charAt(0);
+                            switch (whatToDo) {
+                                case 'P':
+                                case 'p':
+                                    // Removing the player who is packed
+                                    currentPlayerNumber[currentPlayerNumberI] = 0;
+                                    remainingPlayer--;
+                                    switchHandle = 0;
+                                    whatToDoStr = "p";
+                                    // System.out.println("Reamining player is : " + remainingPlayer);
+                            
+                                    // Code for removing player
+                                    for(int j=0; j<3; j++){
+                                        for(int k=0; k<2; k++ ){
+                                            distributedNewCard[currentPlayerNumberI][j][k] = -1;
+                                        }
+                                    }
+                                    System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after pack is "+money[currentPlayerNumberI]);
+                                    System.out.println("Player " + (currentPlayerNumberI+1) + " is out from the game");
+                                    System.out.println("Pack");
+                                    System.out.println("Current pot after you pack is " + currPot);
+                                    break;
+                                
+                                case 'C':
+                                case 'c':
+                                    // Do nothing and keep you playes's card's data as it is
+                                    switchHandle = 0;
+                                    whatToDoStr = "c";
+                                
+                                    if( money[currentPlayerNumberI] >= currChal ){
+                                        money[currentPlayerNumberI] -= currChal;
+                                        System.out.println("Chal");
+                                        System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after chal is "+money[currentPlayerNumberI]);
+                                        currPot += currChal;
+                                    }else{
+                                        System.out.println("You don't have enough money to chal, So you must have to pack\n");
+                                        switchHandle = 1;
+                                    }
+                                
+                                    System.out.println("Player " + (currentPlayerNumberI+1) + " is in the game");
+                                    System.out.println("Current pot after your chal is " + currPot);
+                                    break;
+                                
+                                case 'D':
+                                case 'd':
+                                    // Do nothing and keep you playes's card's data as it is
+                                    switchHandle = 0;
+                                    whatToDoStr = "d";
+                                
+                                    if( money[currentPlayerNumberI] >= currChal*2 ){
+                                        money[currentPlayerNumberI] -= (currChal * 2);
+                                        System.out.println("Double chal");
+                                        System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after double chal is "+money[currentPlayerNumberI]);
+                                        currChal *= 2;
+                                        currPot += currChal;
+                                    }else if( money[currentPlayerNumberI] >= currChal ){
+                                        System.out.println("You have enough money to chal but you don't have enough money to double chal");
+                                        System.out.println("You can do chal but in next turn you can't chal and furthur proceed\n");
+                                        switchHandle = 1;
+                                    }else{
+                                        System.out.println("You don't have enough money to chal so pack\n");
+                                        switchHandle = 1;
+                                    }
+                                    System.out.println("Player " + (currentPlayerNumberI+1) + " is in the game");
+                                    System.out.println("Current pot after you double chal is " + currPot);
+                                    break;
+                                
+                                case 'S':
+                                case 's':
+                                    switchHandle = 0;
+                                    if( (remainingPlayer == 2) && (money[currentPlayerNumberI] >= currChal) ){
+                                        money[currentPlayerNumberI] -= currChal;
+                                        System.out.println("Show");
+                                        System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after show is "+money[currentPlayerNumberI]);
+                                        whatToDoStr = "s";
+                                        isWinnerDeclared = 1;
+                                        goToWinner(distributedNewCard);
+                                        break;
+                                    }else if( remainingPlayer > 2 ){
+                                        System.out.println("You can't do show when there is more than two player, So do chal or pack\n");
+                                        switchHandle = 1;
+                                        whatToDoStr = "a";
+                                    }else if( money[currentPlayerNumberI] < currChal ){
+                                        System.out.println("You don't have enough money to show, So you must have to pack\n");
+                                        switchHandle = 1;
+                                        whatToDoStr = "a";
+                                    }
+                                    System.out.println("Current pot after you turn is " + currPot);
+                                    break;
+                                
+                                default:
+                                    // Enter valid operator if user enter charater other than P,C,p,c
+                                    System.out.println("Enter valid operator\n");
+                                    switchHandle = 1;
+                                    whatToDoStr = "a";
+                                    break;
+                            }
+                        
+                            if( (whatToDo == 'S' || whatToDo == 's') && (remainingPlayer == 2) ){
+                                break;
+                            }
+                        }while ( switchHandle != 0);
+                    
+                        do{
+                            if(currentPlayerNumberI == totalPlayer){
+                                currentPlayerNumberI = 0;
+                            }else{
+                                currentPlayerNumberI++;
+                                if( currentPlayerNumberI == totalPlayer){
+                                    currentPlayerNumberI = 0;
+                                    round++;
+                                }
+                            }
+                        }while( currentPlayerNumber[currentPlayerNumberI] == 0 );
+                    
+                        if( remainingPlayer == 1){
+                            System.out.println("\n\nOnly one player is remianing");
+                            // Declare this remaining player as winner AND currentPlayerNumberI is winner here
+                            System.out.print("Player " + (currentPlayerNumberI+1) + " is winner and its card is : ");
+                            for(int j=0; j<3; j++){
+                                for(int k=0; k<2; k++ ){
+                                    if(k == 0){
+                                        System.out.print( "[" + printNumber(distributedNewCard[currentPlayerNumberI][j][k]) + ",");
+                                    }else{
+                                        System.out.print( printShape(distributedNewCard[currentPlayerNumberI][j][k]) + "]");
+                                    }
+                                }
+                            }
+                            money[currentPlayerNumberI] += currPot;
+                            System.out.println( "\nPlayer " + (currentPlayerNumberI+1) + ", You won so your balance is " + money[currentPlayerNumberI]);
+                            isWinnerDeclared = 1;
+                            break;
+                        }
+                    
+                        if( round == 5 ){
+                            // Write code for declaring winner from the remaining players
+                            // Call function to declare winner
+                            System.out.println("\n\nThe last 4th round is over");
+                            isWinnerDeclared = 1;
+                            goToWinner(distributedNewCard);
+                            break;
+                        }
+                    
+                        if( currPot > potLimit){
+                            // If potLimit exceed declare winner
+                            System.out.println("\n\nPotLimit is crossed");
+                            isWinnerDeclared = 1;
+                            goToWinner(distributedNewCard);
+                            break;
+                        }
+                    
+                        if( (whatToDoStr == "S" || whatToDoStr == "s") && remainingPlayer == 2){
+                            break;
+                        }
+                    
+                    }
+        
+                break;
+
+                case 'N':
+                case 'n':
+                    System.out.println("Game is over");
+                    wantToContinue = 'n';
+                break;
+
+                default:
+                    System.out.println("Enter only Yes or No (Y/N).");
+                    wantToContinue = 'a';
+                    break;
+            }
+            
+
+            
+        }while(wantToContinue != 'n');
+
+        
+        sc.close();
+    }
+
+    public static void goToWinner(int[][][] distributedNewCard){
+        // Filling samePrioty array to know how many players are there with same priority AND simultaneously filling maxPriority
+        for(int i=0; i<totalPlayer; i++){
+
+            // Logic if player is packed
+            if( distributedNewCard[i][0][0] == -1 ){
+                playersWithPriority[i] = -1;
+                // numOfPriority[-1]++;
+                // if(maxPriority < -1){
+                //     maxPriority = -1;
+                // }
+            }
+            // Logic for trial
+            else if((distributedNewCard[i][0][0] == distributedNewCard[i][1][0]) && (distributedNewCard[i][1][0] == distributedNewCard[i][2][0]) && (distributedNewCard[i][0][0] == distributedNewCard[i][2][0])){
+                playersWithPriority[i] = 5;
+                numOfPriority[5]++;
+                maxPriority = 5;
+            }
+            // Logic for Pure Sequence
+            else if((/* A23 */(((distributedNewCard[i][0][0] == 14) || (distributedNewCard[i][1][0] == 14) || (distributedNewCard[i][2][0] == 14))  && ((distributedNewCard[i][0][0] == 2) || (distributedNewCard[i][1][0] == 2) || (distributedNewCard[i][2][0] == 2))  && ((distributedNewCard[i][0][0] == 3) || (distributedNewCard[i][1][0] == 3) || (distributedNewCard[i][2][0] == 3))) || /* 234 */ (((distributedNewCard[i][0][0] == 2) || (distributedNewCard[i][1][0] == 2) || (distributedNewCard[i][2][0] == 2))  && ((distributedNewCard[i][0][0] == 3) || (distributedNewCard[i][1][0] == 3) || (distributedNewCard[i][2][0] == 3))  && ((distributedNewCard[i][0][0] == 4) || (distributedNewCard[i][1][0] == 4) || (distributedNewCard[i][2][0] == 4))) || /* 345 */ (((distributedNewCard[i][0][0] == 3) || (distributedNewCard[i][1][0] == 3) || (distributedNewCard[i][2][0] == 3))  && ((distributedNewCard[i][0][0] == 4) || (distributedNewCard[i][1][0] == 4) || (distributedNewCard[i][2][0] == 4))  && ((distributedNewCard[i][0][0] == 5) || (distributedNewCard[i][1][0] == 5) || (distributedNewCard[i][2][0] == 5))) || /* 456 */ (((distributedNewCard[i][0][0] == 4) || (distributedNewCard[i][1][0] == 4) || (distributedNewCard[i][2][0] == 4))  && ((distributedNewCard[i][0][0] == 5) || (distributedNewCard[i][1][0] == 5) || (distributedNewCard[i][2][0] == 5))  && ((distributedNewCard[i][0][0] == 6) || (distributedNewCard[i][1][0] == 6) || (distributedNewCard[i][2][0] == 6))) || /* 567 */ (((distributedNewCard[i][0][0] == 5) || (distributedNewCard[i][1][0] == 5) || (distributedNewCard[i][2][0] == 5))  && ((distributedNewCard[i][0][0] == 6) || (distributedNewCard[i][1][0] == 6) || (distributedNewCard[i][2][0] == 6))  && ((distributedNewCard[i][0][0] == 7) || (distributedNewCard[i][1][0] == 7) || (distributedNewCard[i][2][0] == 7))) || /* 678 */ (((distributedNewCard[i][0][0] == 6) || (distributedNewCard[i][1][0] == 6) || (distributedNewCard[i][2][0] == 6))  && ((distributedNewCard[i][0][0] == 7) || (distributedNewCard[i][1][0] == 7) || (distributedNewCard[i][2][0] == 7))  && ((distributedNewCard[i][0][0] == 8) || (distributedNewCard[i][1][0] == 8) || (distributedNewCard[i][2][0] == 8))) || /* 789 */ (((distributedNewCard[i][0][0] == 7) || (distributedNewCard[i][1][0] == 7) || (distributedNewCard[i][2][0] == 7))  && ((distributedNewCard[i][0][0] == 8) || (distributedNewCard[i][1][0] == 8) || (distributedNewCard[i][2][0] == 8))  && ((distributedNewCard[i][0][0] == 9) || (distributedNewCard[i][1][0] == 9) || (distributedNewCard[i][2][0] == 9))) || /* 8910 */(((distributedNewCard[i][0][0] == 8) || (distributedNewCard[i][1][0] == 8) || (distributedNewCard[i][2][0] == 8))  && ((distributedNewCard[i][0][0] == 9) || (distributedNewCard[i][1][0] == 9) || (distributedNewCard[i][2][0] == 9))  && ((distributedNewCard[i][0][0] == 10) || (distributedNewCard[i][1][0] == 10) || (distributedNewCard[i][2][0] == 10))) || /* 910J */ (((distributedNewCard[i][0][0] == 9) || (distributedNewCard[i][1][0] == 9) || (distributedNewCard[i][2][0] == 9))  && ((distributedNewCard[i][0][0] == 10) || (distributedNewCard[i][1][0] == 10) || (distributedNewCard[i][2][0] == 10))  && ((distributedNewCard[i][0][0] == 11) || (distributedNewCard[i][1][0] == 11) || (distributedNewCard[i][2][0] == 11))) || /* 10JQ */(((distributedNewCard[i][0][0] == 10) || (distributedNewCard[i][1][0] == 10) || (distributedNewCard[i][2][0] == 10))  && ((distributedNewCard[i][0][0] == 11) || (distributedNewCard[i][1][0] == 11) || (distributedNewCard[i][2][0] == 11))  && ((distributedNewCard[i][0][0] == 12) || (distributedNewCard[i][1][0] == 12) || (distributedNewCard[i][2][0] == 12))) || /* JQK */ (((distributedNewCard[i][0][0] == 11) || (distributedNewCard[i][1][0] == 11) || (distributedNewCard[i][2][0] == 11))  && ((distributedNewCard[i][0][0] == 12) || (distributedNewCard[i][1][0] == 12) || (distributedNewCard[i][2][0] == 12))  && ((distributedNewCard[i][0][0] == 13) || (distributedNewCard[i][1][0] == 13) || (distributedNewCard[i][2][0] == 13))) || /* QKA */ (((distributedNewCard[i][0][0] == 14) || (distributedNewCard[i][1][0] == 14) || (distributedNewCard[i][2][0] == 14))  && ((distributedNewCard[i][0][0] == 13) || (distributedNewCard[i][1][0] == 13) || (distributedNewCard[i][2][0] == 13))  && ((distributedNewCard[i][0][0] == 12) || (distributedNewCard[i][1][0] == 12) || (distributedNewCard[i][2][0] == 12))) && ((((distributedNewCard[i][0][1] == 17) && (distributedNewCard[i][1][1] == 17) && (distributedNewCard[i][2][1] == 17)) || ((distributedNewCard[i][0][1] == 18) && (distributedNewCard[i][1][1] == 18) && (distributedNewCard[i][2][1] == 18)) || ((distributedNewCard[i][0][1] == 19) && (distributedNewCard[i][1][1] == 19) && (distributedNewCard[i][2][1] == 19)) || ((distributedNewCard[i][0][1] == 20) && (distributedNewCard[i][1][1] == 20) && (distributedNewCard[i][2][1] == 20)))))){
+
+                playersWithPriority[i] = 4;
+                numOfPriority[4]++;
+                if(maxPriority < 4){
+                    maxPriority = 4;
+                }
+
+            }
+            // Logic for Sequence
+            else if((/* A23 */(((distributedNewCard[i][0][0] == 14) || (distributedNewCard[i][1][0] == 14) || (distributedNewCard[i][2][0] == 14))  && ((distributedNewCard[i][0][0] == 2) || (distributedNewCard[i][1][0] == 2) || (distributedNewCard[i][2][0] == 2))  && ((distributedNewCard[i][0][0] == 3) || (distributedNewCard[i][1][0] == 3) || (distributedNewCard[i][2][0] == 3))) || /* 234 */ (((distributedNewCard[i][0][0] == 2) || (distributedNewCard[i][1][0] == 2) || (distributedNewCard[i][2][0] == 2))  && ((distributedNewCard[i][0][0] == 3) || (distributedNewCard[i][1][0] == 3) || (distributedNewCard[i][2][0] == 3))  && ((distributedNewCard[i][0][0] == 4) || (distributedNewCard[i][1][0] == 4) || (distributedNewCard[i][2][0] == 4))) || /* 345 */ (((distributedNewCard[i][0][0] == 3) || (distributedNewCard[i][1][0] == 3) || (distributedNewCard[i][2][0] == 3))  && ((distributedNewCard[i][0][0] == 4) || (distributedNewCard[i][1][0] == 4) || (distributedNewCard[i][2][0] == 4))  && ((distributedNewCard[i][0][0] == 5) || (distributedNewCard[i][1][0] == 5) || (distributedNewCard[i][2][0] == 5))) || /* 456 */ (((distributedNewCard[i][0][0] == 4) || (distributedNewCard[i][1][0] == 4) || (distributedNewCard[i][2][0] == 4))  && ((distributedNewCard[i][0][0] == 5) || (distributedNewCard[i][1][0] == 5) || (distributedNewCard[i][2][0] == 5))  && ((distributedNewCard[i][0][0] == 6) || (distributedNewCard[i][1][0] == 6) || (distributedNewCard[i][2][0] == 6))) || /* 567 */ (((distributedNewCard[i][0][0] == 5) || (distributedNewCard[i][1][0] == 5) || (distributedNewCard[i][2][0] == 5))  && ((distributedNewCard[i][0][0] == 6) || (distributedNewCard[i][1][0] == 6) || (distributedNewCard[i][2][0] == 6))  && ((distributedNewCard[i][0][0] == 7) || (distributedNewCard[i][1][0] == 7) || (distributedNewCard[i][2][0] == 7))) || /* 678 */ (((distributedNewCard[i][0][0] == 6) || (distributedNewCard[i][1][0] == 6) || (distributedNewCard[i][2][0] == 6))  && ((distributedNewCard[i][0][0] == 7) || (distributedNewCard[i][1][0] == 7) || (distributedNewCard[i][2][0] == 7))  && ((distributedNewCard[i][0][0] == 8) || (distributedNewCard[i][1][0] == 8) || (distributedNewCard[i][2][0] == 8))) || /* 789 */ (((distributedNewCard[i][0][0] == 7) || (distributedNewCard[i][1][0] == 7) || (distributedNewCard[i][2][0] == 7))  && ((distributedNewCard[i][0][0] == 8) || (distributedNewCard[i][1][0] == 8) || (distributedNewCard[i][2][0] == 8))  && ((distributedNewCard[i][0][0] == 9) || (distributedNewCard[i][1][0] == 9) || (distributedNewCard[i][2][0] == 9))) || /* 8910 */(((distributedNewCard[i][0][0] == 8) || (distributedNewCard[i][1][0] == 8) || (distributedNewCard[i][2][0] == 8))  && ((distributedNewCard[i][0][0] == 9) || (distributedNewCard[i][1][0] == 9) || (distributedNewCard[i][2][0] == 9))  && ((distributedNewCard[i][0][0] == 10) || (distributedNewCard[i][1][0] == 10) || (distributedNewCard[i][2][0] == 10))) || /* 910J */ (((distributedNewCard[i][0][0] == 9) || (distributedNewCard[i][1][0] == 9) || (distributedNewCard[i][2][0] == 9))  && ((distributedNewCard[i][0][0] == 10) || (distributedNewCard[i][1][0] == 10) || (distributedNewCard[i][2][0] == 10))  && ((distributedNewCard[i][0][0] == 11) || (distributedNewCard[i][1][0] == 11) || (distributedNewCard[i][2][0] == 11))) || /* 10JQ */(((distributedNewCard[i][0][0] == 10) || (distributedNewCard[i][1][0] == 10) || (distributedNewCard[i][2][0] == 10))  && ((distributedNewCard[i][0][0] == 11) || (distributedNewCard[i][1][0] == 11) || (distributedNewCard[i][2][0] == 11))  && ((distributedNewCard[i][0][0] == 12) || (distributedNewCard[i][1][0] == 12) || (distributedNewCard[i][2][0] == 12))) || /* JQK */ (((distributedNewCard[i][0][0] == 11) || (distributedNewCard[i][1][0] == 11) || (distributedNewCard[i][2][0] == 11))  && ((distributedNewCard[i][0][0] == 12) || (distributedNewCard[i][1][0] == 12) || (distributedNewCard[i][2][0] == 12))  && ((distributedNewCard[i][0][0] == 13) || (distributedNewCard[i][1][0] == 13) || (distributedNewCard[i][2][0] == 13))) || /* QKA */ (((distributedNewCard[i][0][0] == 14) || (distributedNewCard[i][1][0] == 14) || (distributedNewCard[i][2][0] == 14))  && ((distributedNewCard[i][0][0] == 13) || (distributedNewCard[i][1][0] == 13) || (distributedNewCard[i][2][0] == 13))  && ((distributedNewCard[i][0][0] == 12) || (distributedNewCard[i][1][0] == 12) || (distributedNewCard[i][2][0] == 12))))){
+
+                playersWithPriority[i] = 3;
+                numOfPriority[3]++;
+                if(maxPriority<3){
+                    maxPriority = 3;
+                }
+
+            }
+            // Logic for Colour
+            else if((distributedNewCard[i][0][1] == distributedNewCard[i][1][1]) && (distributedNewCard[i][1][1] == distributedNewCard[i][2][1]) && (distributedNewCard[i][0][1] == distributedNewCard[i][2][1])){
+                playersWithPriority[i] = 2;
+                numOfPriority[2]++;
+                if(maxPriority < 2){
+                    maxPriority = 2;
+                }
+            }
+            else if((distributedNewCard[i][0][0] == distributedNewCard[i][1][0]) || (distributedNewCard[i][1][0] == distributedNewCard[i][2][0]) || (distributedNewCard[i][0][0] == distributedNewCard[i][2][0])){
+                // Logic for Double
+                    playersWithPriority[i] = 1;
+                    numOfPriority[1]++;
+                    if(maxPriority < 1){
+                        maxPriority = 1;
+                    }
+                }
+            else if(maxPriority == 0){
+            // Otherwise High Card
+                playersWithPriority[i] = 0;
+                numOfPriority[0]++;
+                maxPriority = 0;
+            }
+        }
+
+        // Creating variable to initialize that variable with numOfPriority[maxPriority] to know that how many players are there with same priority card
+        int numOfPlayersWithMaxPriorityCards = numOfPriority[maxPriority];
+
+        // Creating array for max priority
+        int[][][] maxPriorityArrayWithCards = new int[numOfPlayersWithMaxPriorityCards][3][2];
+
+
+        // Initialize that array so that we can know that how many players are there with that same priority
+        int tempI = 0; // Variable for array maxPriorityArrayWithCards
+        for(int i=0; i<totalPlayer; i++){
+            if(playersWithPriority[i] == maxPriority){
+                for(int j=0; j<3; j++){
+                    for(int k=0; k<2; k++){
+                        maxPriorityArrayWithCards[tempI][j][k] = distributedNewCard[i][j][k];
+                    }
+                }
+                tempI++;
+            }
+        }
+
+        printMaxPriorityArrayWithCards(maxPriorityArrayWithCards, numOfPlayersWithMaxPriorityCards);
+
+        // Finding winner among them
+        // Passing maxPriorityArrayWithCards to traverse it | samePriorCard for knowing that how many time we want to traverse | playersWithPriority for printing that which player number is winner
+        switch (maxPriority) {
+            case 0:
+                winnerAmongHighCard(maxPriorityArrayWithCards, numOfPlayersWithMaxPriorityCards, playersWithPriority);
+                break;
+
+            case 1:
+                winnerAmongDouble(maxPriorityArrayWithCards, numOfPlayersWithMaxPriorityCards, playersWithPriority);
+                break;
+
+            case 2:
+                winnerAmongColour(maxPriorityArrayWithCards, numOfPlayersWithMaxPriorityCards, playersWithPriority);
+                break;
+
+            case 3:
+                winnerAmongSequence(maxPriorityArrayWithCards, numOfPlayersWithMaxPriorityCards, playersWithPriority);
+                break;
+
+            case 4:
+                winnerAmongPureSequence(maxPriorityArrayWithCards, numOfPlayersWithMaxPriorityCards, playersWithPriority);
+                break;
+
+            case 5:
+                winnerAmongTrial(maxPriorityArrayWithCards, numOfPlayersWithMaxPriorityCards, playersWithPriority);
+                break;
+        
+            default:
+                break;
+        }
+    }
+}

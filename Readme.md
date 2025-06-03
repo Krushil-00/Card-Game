@@ -52,10 +52,11 @@ Enter the starting balance for each player (10,000–214 crore).
 
 2. **Player Actions:**
 
-- **Chal (C):** Bet the current chal amount.
-- **Double Chal (D):** Bet double the current chal amount.
-- **Pack (P):** Fold and exit the current round.
-- **Show (S):** Reveal cards to determine the winner (only allowed when 2 players remain).
+- **Chal (C):** and **Double Chal (D):** (see and chal)
+- **Half Blind:** (Special rule)
+- **Simple Blind:** and **Double Blind:**
+- **Pack (P):** (Fold)
+- **Show (S):** (When only 2 players remain).
 
 3. **Winning Conditions:**
 

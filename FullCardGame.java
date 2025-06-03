@@ -2,7 +2,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
 
-public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlayersCard { 
+public class FullCardGame { 
     // Creating Deck of Card
     static int[][] deck = new int[52][2];
     static Scanner sc1 = new Scanner(System.in);
@@ -25,9 +25,9 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
     static int distributiveNextElement = 0;
     
     // Variable for knowing how many players are there
-    static { System.out.print("Enter number of total player (Between 2 and 17) : " );} // AI is used
+    static { System.out.print("Enter number of total player (Between 2 and 17) : " );}
     static int totalPlayer;
-    static{ // AI is used
+    static{
         while(!(sc1.hasNextInt())){
             System.out.println("Please enter total player between 2 and 17.\nEnter again : ");
             sc1.nextInt();
@@ -450,7 +450,7 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
         if (samePriCard == 1) {
             winnerIndex = 0;
         } else {
-            if (array.length > 0 && array[0].length > 0 && array[0][0].length > 0) { // AI is used
+            if (array.length > 0 && array[0].length > 0 && array[0][0].length > 0) {
                 sortWinCard = sortWinnerCard(array[winnerIndex][0][0], array[winnerIndex][1][0], array[winnerIndex][2][0]);
                 for (int i = 1; i < samePriCard; i++) {
                     if (array[i].length > 0 && array[i][0].length > 0) {
@@ -545,7 +545,7 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
     }
 
     // Method to clear the last printed line
-    public static void clearLine() { // AI is used
+    public static void clearLine() {
         System.out.print("\033[F"); // Move cursor up one line
         System.out.print("\033[2K"); // Clear the entire line
     }
@@ -564,6 +564,12 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
         int remainingPlayer = totalPlayer; // To know how many player is remaining after pack
         int[] currentPlayerNumber = new int[totalPlayer]; // To know that which player is packed
         int currentPlayerNumberI = 0; // To know which player's turn it is
+        int[] hasSeenTheCard = new int[totalPlayer]; // To know that the player has seen the card or not; 0 means blind otherwise not
+        String wantToSeeYourCardStr = "A"; // Variable to know that player has seen the card or not
+        char wantToSeeYourCard = 'a'; // Variable to know that player has seen the card or not
+        String whatLastDone = "a"; // To know that what the last player done in its turn
+        int initialChal = currChal; // To hide and show the "Half Blind" option
+        int hasGiveReplyOfSeeCard = 0; // To know that player has given reply of "Do you want to see your card?" or not; 0 means not given reply otherwise given reply; It is used when player do "N" and then enter wrong operator; so the field "Do you want to see your card?" is not showing again
         for(int i=0; i<totalPlayer; i++){
             currentPlayerNumber[i] = 1;
         }
@@ -596,14 +602,19 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
                 round = 1;
                 whatToDo = 'a';
                 whatToDoStr = "A";
+                wantToSeeYourCardStr = "A";
+                wantToSeeYourCard = 'a';
+                whatLastDone = "a";
                 remainingPlayer = totalPlayer;
                 switchHandle = 0;
                 currentPlayerNumberI = 0;
+                hasGiveReplyOfSeeCard = 0;
                 for(int i=0; i<totalPlayer; i++){
                     currentPlayerNumber[i] = 1;
                 }
                 currChal = (int) Math.ceil(amountHavingAllPlayer * 2 / 100);
                 currPot = totalPlayer * currChal;
+                initialChal = currChal;
                 for(int i=0; i<totalPlayer; i++){
                     if(money[i] < currChal){
                         System.err.println("Player " + (i+1) + " has no sufficient money, So game is forcefully over");
@@ -617,6 +628,7 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
                 //printShuffledDeck();
                 distributeSuffledCard();
                 //printDistributedDeck();
+                Arrays.fill(hasSeenTheCard, 0);
             }
                 
             switch (wantToContinue) {
@@ -632,19 +644,62 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
                             }
                             System.out.println("Current pot amount is " + currPot + "(Pot limit is : " + potLimit + ")");
                             System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance is "+money[currentPlayerNumberI]);
-                            System.out.println("Current chal and show, required amount is " + currChal);
-                            System.out.println("And for double chal, you require " + (currChal * 2));
+
+                            if(hasSeenTheCard[currentPlayerNumberI] == 0 && hasGiveReplyOfSeeCard == 0){
+                                do{
+                                    System.out.println("Do you want to see you card?");
+                                    wantToSeeYourCardStr = sc.nextLine();
+                                    if(wantToSeeYourCardStr.isEmpty()){
+                                        System.out.println("Null character is not allowed, So enter valid operator");
+                                        continue;
+                                    }
+                                    wantToSeeYourCard = wantToSeeYourCardStr.charAt(0);
+                                }while( !(wantToSeeYourCard == 'Y' || wantToSeeYourCard == 'y' ||wantToSeeYourCard == 'n' ||wantToSeeYourCard == 'n') );
+                                if(wantToSeeYourCard == 'Y' || wantToSeeYourCard == 'y'){
+                                    hasSeenTheCard[currentPlayerNumberI] = 1;
+                                    wantToSeeYourCard = 'a';
+                                }
+                                hasGiveReplyOfSeeCard = 1;
+                            }
+
                             System.out.println("What you will do?");
-                            System.out.println("Chal (C)");
-                            System.out.println("Doublr Chal (D)");
-                            System.out.println("Pack (P)");
-                            System.out.println("Show (S)");
-                            System.out.print("Player "+ (currentPlayerNumberI+1) + ", Your card is : "); 
-                            printCurrentPlayerCard(distributedNewCard, currentPlayerNumberI);
-                            System.out.println();
-                            whatToDoStr = sc.nextLine();
-                            clearLine();
-                            clearLine();
+                            if(hasSeenTheCard[currentPlayerNumberI] == 1){
+                                System.out.println("Chal (C)");
+                                System.out.println("Double Chal (D)");
+                                System.out.println("Pack (P)");
+                                System.out.println("Show (S)");
+                                System.out.println("Current chal and show, required amount is " + currChal);
+                                System.out.println("And for double chal, you require " + (currChal * 2));
+                                System.out.print("Player "+ (currentPlayerNumberI+1) + ", Your card is : "); 
+                                printCurrentPlayerCard(distributedNewCard, currentPlayerNumberI);
+                                System.out.println();
+                                whatToDoStr = sc.nextLine();
+                                clearLine();
+                                clearLine();
+                            }else{
+                                if(!(initialChal == currChal) && whatLastDone == "c"){
+                                    System.out.println("Half Blind (H)");
+                                }
+                                System.out.println("Simple Blind (B)");
+                                System.out.println("Double Blind (E)");
+                                System.out.println("Pack (P)");
+                                System.out.println("Show (S)");
+                                if( !(initialChal == currChal) && whatLastDone == "c" ){
+                                    System.out.println("Current Half Blind, requried amount is " + (currChal /2));
+                                    System.out.println("For show, required amount is " + (currChal /2));
+                                }else{
+                                    System.out.println("For show, required amount is " + currChal);
+                                }
+                                System.out.println("For Simple Blind, required amount is " + currChal);
+                                System.out.println("For Double Blind, required amount is " + (currChal * 2));
+                                whatToDoStr = sc.nextLine();
+                                // if( hasSeenTheCard[ (currentPlayerNumberI - 1 + totalPlayer) % totalPlayer ] == 0 ){
+                                //     currChal *= 2;
+                                // }
+                            }
+                            
+                            
+                            
                             if( whatToDoStr.isEmpty() ){
                                 System.out.println("Null character is not allowed, So enter valid operator");
                                 switchHandle = 1;
@@ -659,7 +714,11 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
                                     remainingPlayer--;
                                     switchHandle = 0;
                                     whatToDoStr = "p";
+                                    whatLastDone = "p";
                                     // System.out.println("Reamining player is : " + remainingPlayer);
+                                    if( whatLastDone == "b" ){
+                                        currChal /= 2;
+                                    }
                             
                                     // Code for removing player
                                     for(int j=0; j<3; j++){
@@ -676,16 +735,31 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
                                 case 'C':
                                 case 'c':
                                     // Do nothing and keep you playes's card's data as it is
+                                    if(hasSeenTheCard[currentPlayerNumberI] == 0){
+                                        System.out.println("Enter valid operaor\n");
+                                        switchHandle = 1;
+                                        continue;
+                                    }
                                     switchHandle = 0;
                                     whatToDoStr = "c";
+                                    // Logic if current player seen the card and last player is in blind
+                                    // if( whatLastDone == "b" ){
+                                    //     currChal *= 2;
+                                    // }
+
                                 
                                     if( money[currentPlayerNumberI] >= currChal ){
                                         money[currentPlayerNumberI] -= currChal;
                                         System.out.println("Chal");
                                         System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after chal is "+money[currentPlayerNumberI]);
+                                        whatLastDone = "c";
                                         currPot += currChal;
                                     }else{
                                         System.out.println("You don't have enough money to chal, So you must have to pack\n");
+                                        // Logic if current player seen the card and last player is in blind but this player have not enough money, so forcefully pack
+                                        // if( whatLastDone == "b" ){
+                                        //     currChal /= 2;
+                                        // }
                                         switchHandle = 1;
                                     }
                                 
@@ -696,31 +770,140 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
                                 case 'D':
                                 case 'd':
                                     // Do nothing and keep you playes's card's data as it is
+                                    if(hasSeenTheCard[currentPlayerNumberI] == 0){
+                                        System.out.println("Enter valid operaor\n");
+                                        switchHandle = 1;
+                                        continue;
+                                    }
                                     switchHandle = 0;
                                     whatToDoStr = "d";
+                                    // Logic if current player seen the card and last player is in blind
+                                    // if( whatLastDone == "b" ){
+                                    //     currChal *= 2;
+                                    // }
                                 
                                     if( money[currentPlayerNumberI] >= currChal*2 ){
                                         money[currentPlayerNumberI] -= (currChal * 2);
                                         System.out.println("Double chal");
                                         System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after double chal is "+money[currentPlayerNumberI]);
+                                        whatLastDone = "c";
                                         currChal *= 2;
                                         currPot += currChal;
                                     }else if( money[currentPlayerNumberI] >= currChal ){
                                         System.out.println("You have enough money to chal but you don't have enough money to double chal");
                                         System.out.println("You can do chal but in next turn you can't chal and furthur proceed\n");
+                                        // Logic if current player seen the card and last player is in blind but this player have not enough money, so forcefully pack
+                                        // if( whatLastDone == "b" ){
+                                        //     currChal /= 2;
+                                        // }
+                                        switchHandle = 1;
+                                    }else{
+                                        System.out.println("You don't have enough money to chal so pack\n");
+                                        // Logic if current player seen the card and last player is in blind but this player have not enough money, so forcefully pack
+                                        // if( whatLastDone == "b" ){
+                                        //     currChal /= 2;
+                                        // }
+                                        switchHandle = 1;
+                                    }
+                                    System.out.println("Player " + (currentPlayerNumberI+1) + " is in the game");
+                                    System.out.println("Current pot after you double chal is " + currPot);
+                                    break;
+
+                                case 'H':
+                                case 'h':
+                                    if(hasSeenTheCard[currentPlayerNumberI] == 1 || whatLastDone == "h" || whatLastDone == "b"){
+                                        System.out.println("Enter valid operaor\n");
+                                        switchHandle = 1;
+                                        continue;
+                                    }
+                                    switchHandle = 0;
+                                    whatToDoStr = "h";
+                                
+                                    if( money[currentPlayerNumberI] >= (currChal/2) ){
+                                        money[currentPlayerNumberI] -= (currChal/2);
+                                        System.out.println("Half Blind");
+                                        System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after Half Blind is "+money[currentPlayerNumberI]);
+                                        whatLastDone = "h";
+                                        currPot += (currChal/2);
+                                    }else{
+                                        System.out.println("You don't have enough money to half blind, So you must have to pack\n");
+                                        switchHandle = 1;
+                                    }
+                                
+                                    System.out.println("Player " + (currentPlayerNumberI+1) + " is in the game");
+                                    System.out.println("Current pot after your blind is " + currPot);
+                                    break;
+
+                                
+                                case 'B':
+                                case 'b':
+                                    if(hasSeenTheCard[currentPlayerNumberI] == 1){
+                                        System.out.println("Enter valid operaor\n");
+                                        switchHandle = 1;
+                                        continue;
+                                    }
+                                    switchHandle = 0;
+                                    whatToDoStr = "b";
+                                
+                                    if( money[currentPlayerNumberI] >= currChal ){
+                                        money[currentPlayerNumberI] -= currChal;
+                                        System.out.println("Blind");
+                                        System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after blind is "+money[currentPlayerNumberI]);
+                                        whatLastDone = "b";
+                                        currPot += currChal;
+                                        // currChal *= 2;
+                                    }else{
+                                        System.out.println("You don't have enough money to blind, So you must have to pack\n");
+                                        switchHandle = 1;
+                                    }
+                                
+                                    System.out.println("Player " + (currentPlayerNumberI+1) + " is in the game");
+                                    System.out.println("Current pot after your blind is " + currPot);
+                                    break;
+
+
+                                case 'E':
+                                case 'e':
+                                    if(hasSeenTheCard[currentPlayerNumberI] == 1){
+                                        System.out.println("Enter valid operaor\n");
+                                        switchHandle = 1;
+                                        continue;
+                                    }
+                                    switchHandle = 0;
+                                    whatToDoStr = "e";
+                                
+                                    if( money[currentPlayerNumberI] >= currChal*2 ){
+                                        money[currentPlayerNumberI] -= (currChal * 2);
+                                        System.out.println("Double Blind");
+                                        System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after double blind is "+money[currentPlayerNumberI]);
+                                        whatLastDone = "b";
+                                        currChal *= 2;
+                                        currPot += currChal;
+                                        // currChal *= 2;
+                                    }else if( money[currentPlayerNumberI] >= currChal ){
+                                        System.out.println("You have enough money to blind but you don't have enough money to double blind");
+                                        System.out.println("You can do blind but in next turn you can't blind and furthur proceed\n");
                                         switchHandle = 1;
                                     }else{
                                         System.out.println("You don't have enough money to chal so pack\n");
                                         switchHandle = 1;
                                     }
                                     System.out.println("Player " + (currentPlayerNumberI+1) + " is in the game");
-                                    System.out.println("Current pot after you double chal is " + currPot);
+                                    System.out.println("Current pot after you double blind is " + currPot);
                                     break;
                                 
                                 case 'S':
                                 case 's':
                                     switchHandle = 0;
-                                    if( (remainingPlayer == 2) && (money[currentPlayerNumberI] >= currChal) ){
+                                    if( hasSeenTheCard[currentPlayerNumberI] == 0 && (remainingPlayer == 2) && (money[currentPlayerNumberI] >= (currChal/2)) ){
+                                        money[currentPlayerNumberI] -= (currChal/2);
+                                        System.out.println("Show");
+                                        System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after show is "+money[currentPlayerNumberI]);
+                                        whatToDoStr = "s";
+                                        isWinnerDeclared = 1;
+                                        goToWinner(distributedNewCard);
+                                        break;
+                                    }else if( (remainingPlayer == 2) && (money[currentPlayerNumberI] >= currChal) ){
                                         money[currentPlayerNumberI] -= currChal;
                                         System.out.println("Show");
                                         System.out.println("Player "+ (currentPlayerNumberI+1) + ", Your current balance after show is "+money[currentPlayerNumberI]);
@@ -747,6 +930,7 @@ public class Working5WithChalAndPackButWithMoneyAndMultipleRoundAndDeletingPlaye
                                     whatToDoStr = "a";
                                     break;
                             }
+                            hasGiveReplyOfSeeCard = 0;
                         
                             if( (whatToDo == 'S' || whatToDo == 's') && (remainingPlayer == 2) ){
                                 break;

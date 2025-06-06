@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teen Patti Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="favicon.png">
     <style>
         .card {
             width: 100px;
@@ -557,9 +556,10 @@
             document.getElementById('blind-amount').textContent = gameState.currentChal.toLocaleString('en-IN');
             document.getElementById('half-blind-amount').textContent = Math.floor(gameState.currentChal / 2).toLocaleString('en-IN');
 
-            if (gameState.whatLastDone === 'b' || gameState.whatLastDone === 'h') {
+            if (gameState.whatLastDone === 'b' || gameState.whatLastDone === 'db' /* || gameState.whatLastDone === 'h' */) {
                 gameState.currentChal *= 2;
                 document.getElementById('chal-amount').textContent = gameState.currentChal.toLocaleString('en-IN');
+                currentChalDisplay.textContent = gameState.currentChal.toLocaleString('en-IN');
                 gameState.currentChal /= 2;
             } else {
                 document.getElementById('chal-amount').textContent = gameState.currentChal.toLocaleString('en-IN');
@@ -567,7 +567,7 @@
 
             gameState.currentChal *= 2;
             document.getElementById('double-blind-amount').textContent = gameState.currentChal.toLocaleString('en-IN');
-            if (gameState.whatLastDone === 'b' || gameState.whatLastDone === 'h') {
+            if (gameState.whatLastDone === 'b' || gameState.whatLastDone === 'db' /* || gameState.whatLastDone === 'h' */) {
                 gameState.currentChal *= 2;
                 document.getElementById('double-chal-amount').textContent = gameState.currentChal.toLocaleString('en-IN');
                 gameState.currentChal /= 2;
@@ -655,6 +655,7 @@
                         gameState.pot += gameState.currentChal;
                         gameState.isBlind[gameState.currentPlayerIndex] = true;
                         gameState.whatLastDone = 'b';
+                        currentChalDisplay.textContent = gameState.currentChal.toLocaleString('en-IN');
                         addToLog(`${player.name} played BLIND (₹${gameState.currentChal})`);
                     } else {
                         alert("You don't have enough money for blind chal!");
@@ -668,7 +669,8 @@
                         gameState.pot += gameState.currentChal * 2;
                         gameState.currentChal = gameState.currentChal * 2;
                         gameState.isBlind[gameState.currentPlayerIndex] = true;
-                        gameState.whatLastDone = 'b';
+                        gameState.whatLastDone = 'db';
+                        currentChalDisplay.textContent = gameState.currentChal.toLocaleString('en-IN');
                         addToLog(`${player.name} played DOUBLE BLIND (₹${gameState.currentChal})`);
                     } else {
                         alert("You don't have enough money for double blind chal!");
@@ -677,13 +679,14 @@
                     break;
 
                 case 'chal':
-                    if (gameState.whatLastDone == 'b') {
+                    if (gameState.whatLastDone == 'b' || gameState.whatLastDone == 'db' /* || gameState.whatLastDone == 'h' */) {
                         gameState.currentChal *= 2;
                     }
                     if (player.money >= gameState.currentChal) {
                         player.money -= gameState.currentChal;
                         gameState.pot += gameState.currentChal;
                         gameState.whatLastDone = 'c';
+                        currentChalDisplay.textContent = gameState.currentChal.toLocaleString('en-IN');
                         addToLog(`${player.name} played CHAL (₹${gameState.currentChal})`);
                     } else {
                         alert("You don't have enough money for chal!");
@@ -695,7 +698,7 @@
                     break;
 
                 case 'doubleChal':
-                    if (gameState.whatLastDone == 'b') {
+                    if (gameState.whatLastDone == 'b' || gameState.whatLastDone == 'db' /* || gameState.whatLastDone == 'h' */) {
                         gameState.currentChal *= 2;
                     }
                     if (player.money >= gameState.currentChal * 2) {
@@ -703,6 +706,7 @@
                         gameState.pot += gameState.currentChal * 2;
                         gameState.currentChal *= 2;
                         gameState.whatLastDone = 'c';
+                        currentChalDisplay.textContent = gameState.currentChal.toLocaleString('en-IN');
                         addToLog(`${player.name} played DOUBLE CHAL (₹${gameState.currentChal})`);
                     } else {
                         alert("You don't have enough money for double chal!");
@@ -719,7 +723,8 @@
                     if (gameState.whatLastDone === 'b' && gameState.whatCurrDone === 'n') {
                         gameState.currentChal /= 2;
                     }
-                    gameState.whatLastDone = 'p';
+                    currentChalDisplay.textContent = gameState.currentChal.toLocaleString('en-IN');
+                    // gameState.whatLastDone = 'p';
                     break;
 
                 case 'show':

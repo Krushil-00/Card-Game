@@ -657,8 +657,8 @@ public class FullCardGame {
                                 }while( !(wantToSeeYourCard == 'Y' || wantToSeeYourCard == 'y' ||wantToSeeYourCard == 'n' ||wantToSeeYourCard == 'n') );
                                 if(wantToSeeYourCard == 'Y' || wantToSeeYourCard == 'y'){
                                     hasSeenTheCard[currentPlayerNumberI] = 1;
-                                    wantToSeeYourCard = 'a';
                                 }
+                                wantToSeeYourCard = 'a';
                                 hasGiveReplyOfSeeCard = 1;
                             }
 

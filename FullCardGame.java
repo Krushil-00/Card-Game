@@ -677,7 +677,7 @@ public class FullCardGame {
                                 clearLine();
                                 clearLine();
                             }else{
-                                if(!(initialChal == currChal) && whatLastDone == "c"){
+                                if( (!(initialChal == currChal) && whatLastDone == "c") || whatLastDone == "h" ){
                                     System.out.println("Half Blind (H)");
                                 }
                                 System.out.println("Simple Blind (B)");
